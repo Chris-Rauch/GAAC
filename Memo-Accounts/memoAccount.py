@@ -4,6 +4,11 @@ from selenium.common.exceptions import NoSuchElementException
 import time
 import os
 import csv
+'''
+When checking for wrong account memo:
+    1) replace and &
+    2) only check a substring
+'''
 
 start_time = time.time()
 
@@ -12,7 +17,7 @@ connected_memo = "L/P CALL ROBO CONNECTED"
 no_answer_memo = "L/P CALL ATTEMPTED NO ANSWER BY INSURED"
 bad_number_memo = "L/P CALL ATTEMPTED BAD NUMBER"
 website = "https://gaac.thirdeyesys.ca/insight/"
-inputFile = "DetsailedReport2.csv"
+inputFile = "DetailedReport.csv"
 
 #Returns truw if the memo was successfully saved
 def memo_Account(driver,account_number,insured_name,memo_subject,memo_body):
@@ -27,7 +32,7 @@ def memo_Account(driver,account_number,insured_name,memo_subject,memo_body):
         contractSearch.send_keys(x)
         driver.find_element_by_name("quoteSearchContractByAll").click()
 
-        if insured_name.upper() in driver.find_element_by_xpath("//*[@id="tab0"]/div[1]/table/tbody/tr[2]/td[3]").text.upper():
+        if insured_name in driver.find_element_by_xpath("//*[@id='tab0']/div[1]/table/tbody/tr[2]/td[3]").text:
 
             #navigate to memo screen
             element=driver.find_element_by_xpath("//body")
@@ -72,6 +77,7 @@ def memo_Account(driver,account_number,insured_name,memo_subject,memo_body):
             else:
                 return True
         else:
+            print("ALMOST MEMO'D WRONG ACC")
             return False
 
 
@@ -90,12 +96,11 @@ def memo_Message(msg):
         return "Error"
 
 def format_Subject(contact_name,dial_number,call_start_time,call_end_time,message_id,job_id):
-    subject = ("Insured: " + contact_name + '\n' +
-              "Dial Number: " + dial_number + '\n' +
-              "Call Start Time: " + call_start_time + '\n' +
-              "Call End Time: " + call_end_time + '\n' +
-              "Message ID: " + message_id + '\n' +
-              "Job ID: " + job_id)
+    subject = ("DIAL NUMBER:" + dial_number + '\n' +
+              "CALL START TIME:" + call_start_time + '\n' +
+              "CALL END TIME:" + call_end_time + '\n' +
+              "MESSAGE ID:" + message_id + '\n' +
+              "JOB ID:" + job_id)
     return subject
 
 #create driver object

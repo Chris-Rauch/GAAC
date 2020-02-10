@@ -1,6 +1,7 @@
 /* TODO:
  * No Call Agreement
- * Remove &
+ * Auto Fill the Group Tab
+ * Compare NCA list before 'and' replacement
  * 
  */
 
@@ -28,7 +29,8 @@ var noCallAgreementArr = ["Anthony Napoli Insurance Agency Inc.",
                           "ERIK HANSEN INSURANCE",
                           "Fixated Financial and Insurance Solutions Inc.",
                           "JAMES DUNNE INSURANCE AGENCY",
-                          "ROBINSON & FOGLE INSURANCE AGENCY"];
+                          "ROBINSON & FOGLE INSURANCE AGENCY",
+                          "ROBINSON  and  FOGLE INSURANCE AGENCY"];
 
 // Functions
 
@@ -221,8 +223,6 @@ function arrToString(arr, header) {
 // Format: <Insured,Phone,Group,Agent,Balance,Date,Contract #>
 function arrToFormattedString(arr,header) {
     var str = header + '\n';
-    //console.log("test");
-    //console.log(arr[0].ContractNumber);
     for(var i = 0; i < arr.length; ++i) {
         str += (arr[i].Insured + ',' + arr[i].PhoneNumber + ',' + "" + ',' + arr[i].AgentName + ',' + 
         arr[i].AmountDue + ',' + arr[i].IntentDate + ',' + arr[i].ContractNumber + '\n');
