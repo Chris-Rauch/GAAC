@@ -13,6 +13,10 @@ no_answer_memo = "L/P CALL ATTEMPTED NO ANSWER BY INSURED"
 bad_number_memo = "L/P CALL ATTEMPTED BAD NUMBER"
 website = "https://gaac.thirdeyesys.ca/insight/"
 inputFile = "DetsailedReport2.csv"
+gaac_uname = "###"
+gaac_pword = "***"
+
+# === FUCNTIONS ===
 
 #Returns truw if the memo was successfully saved
 def memo_Account(driver,account_number,insured_name,memo_subject,memo_body):
@@ -52,8 +56,8 @@ def memo_Account(driver,account_number,insured_name,memo_subject,memo_body):
                 ''' 
                 exit("No Such Element Exception...Unable to save memo")
             else:
-                #pass
-                save_memo.click()
+                pass
+                #save_memo.click()
             finally:
                 pass
 
@@ -98,6 +102,8 @@ def format_Subject(contact_name,dial_number,call_start_time,call_end_time,messag
               "Job ID: " + job_id)
     return subject
 
+# === MAIN ===
+
 #create driver object
 chrome_options = webdriver.ChromeOptions()
 chrome_options.add_argument('--headless')
@@ -110,8 +116,8 @@ username = driver.find_element_by_name("LoginId")
 password = driver.find_element_by_name("LoginPassword")
 username.clear()
 password.clear()
-username.send_keys("Chris")
-password.send_keys("Matt1907")
+username.send_keys(gaac_uname)
+password.send_keys(gaac_pword)
 driver.find_element_by_name("login").click()
 
 #test for successful login
