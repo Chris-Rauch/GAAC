@@ -2,7 +2,7 @@
  * No Call Agreement
  * Auto Fill the Group Tab
  * Compare NCA list before 'and' replacement
- * 
+ * Check duplicate numbers
  */
 
 
@@ -272,6 +272,9 @@ function checkDuplicateInsured(arr) {
         }
     }
 }
+
+// BETTER WAY TO COMPARE INSURED NAMES 
+// https://stackoverflow.com/questions/10473745/compare-strings-javascript-return-of-likely
 
 // === checkSubstring ===
 // Description: Helper function to find insured's with similar names
