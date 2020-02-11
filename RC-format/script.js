@@ -155,7 +155,7 @@ function checkNoCallAgreement() {
         for(var j = 0; j < noCallAgreementArr.length; j++) {
             if(ContractArray[i].AgentName.toLowerCase() == noCallAgreementArr[j].toLowerCase()) {
                 ContractArray[i].NoCallAgreement = true;
-                j = noCallAgreementArr.length;
+                j = noCallAgreementArr.length; //exit early
             }
         }
     }
@@ -168,7 +168,7 @@ function checkNoCallAgreement() {
 //         to words (January 1 2020)
 //         Puts spaces in the contract number (M W F 1 0 1 0 1 0)
 //         Appends contract numbers with duplicate insured
-//         Sorts by Name of Insured A-Z
+//         Sorts by Name of Insured A-Z, alphanumeric
 function formatData(arr) {
     for(var i = 0; i < arr.length; ++i) {
         //numbers to words
@@ -186,17 +186,6 @@ function formatData(arr) {
 
     checkDuplicateInsured(arr);
     arr.sort(compareFunction);
-}
-
-// === viewArray ===
-function viewArray(arr) {
-    for(var i = 0; i < arr.length; ++i){
-        console.log(arr[i].AgentName, ',', arr[i].AgentCode, ',', arr[i].GroupType, ',', arr[i].ContractNumber, ',', 
-                    arr[i].Insured, ',', arr[i].PhoneNumber, ',', arr[i].IntentDate, ',', arr[i].CancelDate, ',',
-                    arr[i].AmountDue, ',', arr[i].NoCallAgreement);
-        
-    }
-
 }
 
 // === arrToString ===
@@ -227,7 +216,6 @@ function arrToFormattedString(arr,header) {
         str += (arr[i].Insured + ',' + arr[i].PhoneNumber + ',' + "" + ',' + arr[i].AgentName + ',' + 
         arr[i].AmountDue + ',' + arr[i].IntentDate + ',' + arr[i].ContractNumber + '\n');
     }
-
     return str;
 }
 
@@ -258,51 +246,72 @@ function download(dataStr,filename,type) {
 }
 
 // === checkDuplicateInsured ===
+// Input: [arr] - An array of contracts
+//
+// Output: Appends contracts with same number, same agent and similar insured names
+//         Using .33 as the minimum similarity required. That's the lowest contract i've found so far      
 function checkDuplicateInsured(arr) {
+    sim_ratio = .33;
     for(var i = 0; i < arr.length - 1; ++i) {
         for(var j = i+1; j < arr.length; ++j) {
-            if(arr[i].PhoneNumber == arr[j].PhoneNumber) {
-                console.log("Matchinng phone numbers on lines", (i+2), "and",(j+1));
-            }
-            if( (checkSubstring(arr[i].Insured,arr[j].Insured)) && (arr[i].PhoneNumber == arr[j].PhoneNumber) ) {
+            if( (arr[i].PhoneNumber == arr[j].PhoneNumber) && (arr[i].AgentCode == arr[j].AgentCode) 
+                    && (similarity(arr[i].Insured,arr[j].Insured) > sim_ratio) ) {
                 arr[i].ContractNumber += ("and " + arr[j].ContractNumber);
                 arr.splice(j,1);
-                console.log("Matchinng phone numbers merged on lines", (i+2), "and",(j+1));
+                //console.log("Matchinng phone numbers merged on lines", (i+2), "and",(j+1));
+            }
+            else if(arr[i].PhoneNumber == arr[j].PhoneNumber) {
+                //flag these and put them in another file to be followed up manually
             }
         }
     }
 }
 
-// BETTER WAY TO COMPARE INSURED NAMES 
-// https://stackoverflow.com/questions/10473745/compare-strings-javascript-return-of-likely
-
-// === checkSubstring ===
-// Description: Helper function to find insured's with similar names
-function checkSubstring(a,b) {
-    var smallStr = "";
-    var bigStr = "";
-    var subStr = "";
-
-    //find the smaller string
-    if(a == b) {
-        return true;
-    } else if(a.length > b.length) {
-        samllStr = b;
-        bigStr = a;
-    } else if(a.length < b.length) {
-        smallStr = a;
-        bigStr = b;
+// === similarity ===
+// Description: Compares two strings and returns a likeness % based on Levenshtein distance (edit distance)
+function similarity(s1, s2) {
+    var longer = s1;
+    var shorter = s2;
+    if (s1.length < s2.length) {
+        longer = s2;
+        shorter = s1;
     }
-
-    //check if smallStr is a substring of the bigger string
-    if(bigStr.indexOf(smallStr) > -1) {
-        return true;
-    } else {
-        return false;
+    var longerLength = longer.length;
+    if (longerLength == 0) {
+        return 1.0;
     }
+    return (longerLength - editDistance(longer, shorter)) / parseFloat(longerLength);
+}
+// === editDistance ===
+// Description: Helper function to calculate Levenshtein distance (edit distance)
+function editDistance(s1, s2) {
+    s1 = s1.toLowerCase();
+    s2 = s2.toLowerCase();
+  
+    var costs = new Array();
+    for (var i = 0; i <= s1.length; i++) {
+        var lastValue = i;
+        for (var j = 0; j <= s2.length; j++) {
+            if (i == 0) 
+                costs[j] = j;
+            else {
+                if (j > 0) {
+                    var newValue = costs[j - 1];
+                    if (s1.charAt(i - 1) != s2.charAt(j - 1))
+                        newValue = Math.min(Math.min(newValue, lastValue),costs[j]) + 1;
+                    costs[j - 1] = lastValue;
+                    lastValue = newValue;
+                }
+            }
+        }
+        if (i > 0)
+            costs[s2.length] = lastValue;
+    }
+    return costs[s2.length];
 }
 
 // === compareFunction ===
+// Description: Used to sort contract array by insured name. Alphanumeric 1-Z
 function compareFunction(a,b) {
     const A = a.Insured.toUpperCase();
     const B = b.Insured.toUpperCase();
@@ -362,3 +371,11 @@ function remove(str,c) {
     return str;
 }
 
+// === viewArray ===
+function viewArray(arr) {
+    for(var i = 0; i < arr.length; ++i){
+        console.log(arr[i].AgentName, ',', arr[i].AgentCode, ',', arr[i].GroupType, ',', arr[i].ContractNumber, ',', 
+                    arr[i].Insured, ',', arr[i].PhoneNumber, ',', arr[i].IntentDate, ',', arr[i].CancelDate, ',',
+                    arr[i].AmountDue, ',', arr[i].NoCallAgreement);
+    }
+}
