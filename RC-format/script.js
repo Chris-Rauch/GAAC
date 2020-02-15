@@ -5,7 +5,7 @@
  * Check duplicate numbers
  */
 
-
+console.log("Hello there!");
 
 // Check for the various File API support.
 if (window.File && window.FileReader && window.FileList && window.Blob) {
@@ -29,8 +29,7 @@ var noCallAgreementArr = ["Anthony Napoli Insurance Agency Inc.",
                           "ERIK HANSEN INSURANCE",
                           "Fixated Financial and Insurance Solutions Inc.",
                           "JAMES DUNNE INSURANCE AGENCY",
-                          "ROBINSON & FOGLE INSURANCE AGENCY",
-                          "ROBINSON  and  FOGLE INSURANCE AGENCY"];
+                          "ROBINSON & FOGLE INSURANCE AGENCY"];
 
 // Functions
 
@@ -60,7 +59,7 @@ function submitForm(evt) {
     if(file) {
         var reader = new FileReader();
         reader.onload = function(e) {
-
+console.log("is this working")
             //change data from a single string to an array of Contract objects
             prepareData(e.target.result);
 
@@ -78,6 +77,7 @@ function submitForm(evt) {
             //viewArray(ContractArray);
             
             //write to file and download 
+            
             download(str0,"No-Number.csv",'text/csv;charset=utf-8;');
             download(str1,"No-Call-Agreement.csv",'text/csv;charset=utf-8;');
             download(str2,"Robo-Caller.csv",'text/csv;charset=utf-8;');
@@ -101,7 +101,7 @@ function prepareData(data) {
 
     //remove commas
     data = removeCommas(data);
-    data = replaceAll(data,'&',' and ');
+    //data = replaceAll(data,'&',' and ');
 
     fileArr = data.split('\n');//this causes the last line to be empty
        
@@ -122,6 +122,7 @@ function prepareData(data) {
     }
     //set NoCallAgreement to true if necessary
     checkNoCallAgreement();
+    data = replaceAll(data,'&',' and ');
 }
 
 // === sortFiles ===
@@ -153,7 +154,8 @@ function sortFiles() {
 function checkNoCallAgreement() {
     for(var i = 0; i < ContractArray.length; i++) {
         for(var j = 0; j < noCallAgreementArr.length; j++) {
-            if(ContractArray[i].AgentName.toLowerCase() == noCallAgreementArr[j].toLowerCase()) {
+            agtName = ContractArray[i].AgentName.toLowerCase()
+            if(agtName.trim() == noCallAgreementArr[j].toLowerCase()) {
                 ContractArray[i].NoCallAgreement = true;
                 j = noCallAgreementArr.length; //exit early
             }
@@ -185,14 +187,9 @@ function formatData(arr) {
     }
 
     checkDuplicateInsured(arr);
-    arr.sort(compareFunction);
-}
-
-// === arrToString ===
-// Input: [arr] - An array of Contract objects
-//
-// Output: returns a concatenated string in csv format
-//
+    //
+    // Output: returns a concatenated string in csv AND robo caller format
+    //
 // Format: <Agent Name,Agent Code,Group Type,Contract #,Insured,Insured Tel. No.,Intent Date,Cancel Date,Amount Due>
 function arrToString(arr, header) {
     var str = header + '\n';
@@ -254,14 +251,15 @@ function checkDuplicateInsured(arr) {
     sim_ratio = .33;
     for(var i = 0; i < arr.length - 1; ++i) {
         for(var j = i+1; j < arr.length; ++j) {
-            if( (arr[i].PhoneNumber == arr[j].PhoneNumber) && (arr[i].AgentCode == arr[j].AgentCode) 
+            if( (arr[i].PhoneNumber == arr[j].PhoneNumber) && (similarity(arr[i].AgentName,arr[j].AgentName) > sim_ratio)  
                     && (similarity(arr[i].Insured,arr[j].Insured) > sim_ratio) ) {
                 arr[i].ContractNumber += ("and " + arr[j].ContractNumber);
                 arr.splice(j,1);
-                //console.log("Matchinng phone numbers merged on lines", (i+2), "and",(j+1));
+                console.log("Matchinng phone numbers merged on lines", (i+2), "and",(j+1));
             }
             else if(arr[i].PhoneNumber == arr[j].PhoneNumber) {
                 //flag these and put them in another file to be followed up manually
+                console.log(arr[i].ContractNumber,"and",arr[j].ContractNumber);  
             }
         }
     }
