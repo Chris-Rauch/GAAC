@@ -29,8 +29,7 @@ var noCallAgreementArr = ["Anthony Napoli Insurance Agency Inc.",
                           "ERIK HANSEN INSURANCE",
                           "Fixated Financial and Insurance Solutions Inc.",
                           "JAMES DUNNE INSURANCE AGENCY",
-                          "ROBINSON & FOGLE INSURANCE AGENCY",
-                          "ROBINSON  and  FOGLE INSURANCE AGENCY"];
+                          "ROBINSON & FOGLE INSURANCE AGENCY"];
 
 // Functions
 
@@ -101,7 +100,7 @@ function prepareData(data) {
 
     //remove commas
     data = removeCommas(data);
-    data = replaceAll(data,'&',' and ');
+    //data = replaceAll(data,'&',' and ');
 
     fileArr = data.split('\n');//this causes the last line to be empty
        
@@ -122,6 +121,7 @@ function prepareData(data) {
     }
     //set NoCallAgreement to true if necessary
     checkNoCallAgreement();
+    data = replaceAll(data,'&',' and ');
 }
 
 // === sortFiles ===
@@ -153,7 +153,8 @@ function sortFiles() {
 function checkNoCallAgreement() {
     for(var i = 0; i < ContractArray.length; i++) {
         for(var j = 0; j < noCallAgreementArr.length; j++) {
-            if(ContractArray[i].AgentName.toLowerCase() == noCallAgreementArr[j].toLowerCase()) {
+            agtName = ContractArray[i].AgentName.toLowerCase();
+            if(agtName.trim() == noCallAgreementArr[j].toLowerCase()) {
                 ContractArray[i].NoCallAgreement = true;
                 j = noCallAgreementArr.length;
             }
