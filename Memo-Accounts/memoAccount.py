@@ -17,7 +17,7 @@ inputFile = "DetailedReport.csv"
 gaac_uname = "###"
 gaac_pword = "***"
 
-failed-accounts = []
+failed_accounts = []
 
 # === FUCNTIONS ===
 
@@ -34,9 +34,11 @@ def memo_Account(driver,account_number,insured_name,memo_subject,memo_body):
         contractSearch.send_keys(x)
         driver.find_element_by_name("quoteSearchContractByAll").click()
 
-        if (insured_name.replace(" and ", "&") in driver.find_element_by_xpath("//*[@id='tab0']/div[1]/table/tbody/tr[2]/td[3]").text) or (insured_name in driver.find_element_by_xpath("//*[@id='tab0']/div[1]/table/tbody/tr[2]/td[3]").text):
+        if (insured_name.replace(" and ", "&") in driver.find_element_by_xpath("//*[@id='tab0']/div[1]/table/tbody/tr[2]/td[3]").text) 
+        or (insured_name.replace(" and", "&") in driver.find_element_by_xpath("//*[@id='tab0']/div[1]/table/tbody/tr[2]/td[3]").text)
+        or (insured_name in driver.find_element_by_xpath("//*[@id='tab0']/div[1]/table/tbody/tr[2]/td[3]").text):
 
-            #navigate to memo screen
+            #navigate to memo screenhttps://stackoverflow.com/questions/10140999/csv-with-comma-or-semicolon
             element=driver.find_element_by_xpath("//body")
             element.send_keys(Keys.ALT, 'M')
             driver.find_element_by_id("memoFunctions").click()
@@ -98,11 +100,11 @@ def memo_Message(msg):
         return "Error"
 
 def format_Subject(contact_name,dial_number,call_start_time,call_end_time,message_id,job_id):
-    subject = ("DIAL NUMBER: [" + dial_number + ']' +
-              "CALL START TIME: [" + call_start_time + ']' +
-              "CALL END TIME: [" + call_end_time + ']' +
-              "MESSAGE ID: [" + message_id + ']' +
-              "JOB ID: [" + job_id + ']')
+    subject = ("DIAL NUMBER: [" + dial_number + '] ' +
+              "CALL START TIME: [" + call_start_time + '] ' +
+              "CALL END TIME: [" + call_end_time + '] ' +
+              "MESSAGE ID: [" + message_id + '] ' +
+              "JOB ID: [" + job_id + '] ')
     return subject
 
 # === MAIN ===

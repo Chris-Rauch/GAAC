@@ -29,7 +29,7 @@ var noCallAgreementArr = ["Anthony Napoli Insurance Agency Inc.",
                           "ERIK HANSEN INSURANCE",
                           "Fixated Financial and Insurance Solutions Inc.",
                           "JAMES DUNNE INSURANCE AGENCY",
-                          "ROBINSON & FOGLE INSURANCE AGENCY"];
+                          "ROBINSON  and  FOGLE INSURANCE AGENCY"];
 
 // Functions
 
@@ -100,7 +100,7 @@ function prepareData(data) {
 
     //remove commas
     data = removeCommas(data);
-    //data = replaceAll(data,'&',' and ');
+    data = replaceAll(data,'&',' and ');
 
     fileArr = data.split('\n');//this causes the last line to be empty
        
@@ -121,7 +121,6 @@ function prepareData(data) {
     }
     //set NoCallAgreement to true if necessary
     checkNoCallAgreement();
-    data = replaceAll(data,'&',' and ');
 }
 
 // === sortFiles ===
@@ -274,6 +273,32 @@ function checkDuplicateInsured(arr) {
     }
 }
 
+// === checkSubstring ===
+// Description: Helper function to find insured's with similar names
+function checkSubstring(a,b) {
+    var smallStr = "";
+    var bigStr = "";
+    var subStr = "";
+
+    //find the smaller string
+    if(a == b) {
+        return true;
+    } else if(a.length > b.length) {
+        smallStr = b;
+        bigStr = a;
+    } else if(a.length < b.length) {
+        smallStr = a;
+        bigStr = b;
+    }
+
+    //check if smallStr is a substring of the bigger string
+    if(bigStr.indexOf(smallStr) > -1) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 function similarity(s1, s2) {
     var longer = s1;
     var shorter = s2;
@@ -313,35 +338,6 @@ function editDistance(s1, s2) {
             costs[s2.length] = lastValue;
     }
     return costs[s2.length];
-}
-
-// BETTER WAY TO COMPARE INSURED NAMES 
-// https://stackoverflow.com/questions/10473745/compare-strings-javascript-return-of-likely
-
-// === checkSubstring ===
-// Description: Helper function to find insured's with similar names
-function checkSubstring(a,b) {
-    var smallStr = "";
-    var bigStr = "";
-    var subStr = "";
-
-    //find the smaller string
-    if(a == b) {
-        return true;
-    } else if(a.length > b.length) {
-        samllStr = b;
-        bigStr = a;
-    } else if(a.length < b.length) {
-        smallStr = a;
-        bigStr = b;
-    }
-
-    //check if smallStr is a substring of the bigger string
-    if(bigStr.indexOf(smallStr) > -1) {
-        return true;
-    } else {
-        return false;
-    }
 }
 
 // === compareFunction ===
