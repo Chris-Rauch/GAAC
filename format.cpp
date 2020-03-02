@@ -73,6 +73,7 @@ int main() {
 
     //skip the two header lines
     group = getHeader(IntentReportFile);
+/*
     dir = string("/home/chris/Documents/GAAC_RoboTalker") + group;
     try {    
         mkdir(dir);
@@ -81,7 +82,7 @@ int main() {
         std::cerr << e.what() << '\n';
     }
     
-  
+*/
     //populate No Call Agreement Vector  
     while(getline(NCAFile,str,'\n')) {
         ncaList.push_back(trim(str));
