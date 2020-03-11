@@ -17,9 +17,74 @@ inputFile = "DetailedReport.csv"
 gaac_uname = "###"
 gaac_pword = "***"
 
-failed_accounts = []
+
 
 # === FUCNTIONS ===
+
+'''
+Description: Memo's accounts in Third Eye
+
+Input:  [driver]          - selenium webdriver object. Expected to already be on the 'Search Contracts' page
+        [account_numbers] - array of account numbers. MWF prefix is optional {MWF99999,99999}              
+        [memo_subject]    - The subject as a string
+        [memo_body]       - The body as a string
+        [insured_name]    - Optional. Used to do an additional check 
+
+Output: Returns true if all the accounts were memo'd succsesfully. Otherwise,
+        return false.    
+'''
+def memo_Accounts(driver,account_numbers,memo_subject,memo_body,insured_name = None):
+    for x in account_numbers:
+        #input contract number into search bar and search
+        contractSearch = driver.find_element_by_name("VISIBLE_ContractNo")
+        contractSearch.clear()
+        contractSearch.send_keys(x)
+        driver.find_element_by_name("quoteSearchContractByAll").click()
+
+        #Do optional check and compare insured names
+        if insured_name != None:
+            compare_insured = driver.find_element_by_xpath("//*[@id='tab0']/div[1]/table/tbody/tr[2]/td[3]").text
+            if compare_insured.strip() != insured_name.strip():
+                return False
+
+        #navigate to memo screen and write memo
+        element=driver.find_element_by_xpath("//body")
+        element.send_keys(Keys.ALT, 'M')
+        driver.find_element_by_id("memoFunctions").click()
+        memoSubject = driver.find_element_by_id("memoSubject")
+        memoBody = driver.find_element_by_id("memoBody")
+        memoSubject.clear()
+        memoBody.clear()
+        memoSubject.send_keys(memo_subject)
+        memoBody.send_keys(memo_body)
+
+        #save memo
+        try:
+            save_memo = driver.find_element_by_xpath('//*[@title="Save Memo"]')  
+        except NoSuchElementException: 
+            print("No Such Element Exception...Unable to save memo")
+            print('Contract Number:',x)
+            return False
+        else:
+            pass
+            #save_memo.click()
+        finally:
+            pass
+
+        #set driver back to 'Search Page' and loop
+        if(x != account_numbers[-1]):
+            try:
+                contract_page = driver.find_element_by_id("oCMenu2_top3a_0")
+           except NoSuchElementException: 
+                print("Could not locate Contract Search Page")
+                return False
+            else:
+                contract_page.click() 
+            finally: 
+                pass
+        else:
+            return True
+        
 
 #Returns truw if the memo was successfully saved
 def memo_Account(driver,account_number,insured_name,memo_subject,memo_body):
@@ -34,11 +99,13 @@ def memo_Account(driver,account_number,insured_name,memo_subject,memo_body):
         contractSearch.send_keys(x)
         driver.find_element_by_name("quoteSearchContractByAll").click()
 
-        if (insured_name.replace(" and ", "&") in driver.find_element_by_xpath("//*[@id='tab0']/div[1]/table/tbody/tr[2]/td[3]").text) 
-        or (insured_name.replace(" and", "&") in driver.find_element_by_xpath("//*[@id='tab0']/div[1]/table/tbody/tr[2]/td[3]").text)
-        or (insured_name in driver.find_element_by_xpath("//*[@id='tab0']/div[1]/table/tbody/tr[2]/td[3]").text):
+        if (
+               (insured_name.replace(" and ", "&") in driver.find_element_by_xpath("//*[@id='tab0']/div[1]/table/tbody/tr[2]/td[3]").text) or 
+               (insured_name.replace(" and", "&") in driver.find_element_by_xpath("//*[@id='tab0']/div[1]/table/tbody/tr[2]/td[3]").text) or
+               (insured_name in driver.find_element_by_xpath("//*[@id='tab0']/div[1]/table/tbody/tr[2]/td[3]").text)
+           ):
 
-            #navigate to memo screenhttps://stackoverflow.com/questions/10140999/csv-with-comma-or-semicolon
+            #navigate to memo screen https://stackoverflow.com/questions/10140999/csv-with-comma-or-semicolon
             element=driver.find_element_by_xpath("//body")
             element.send_keys(Keys.ALT, 'M')
             driver.find_element_by_id("memoFunctions").click()
@@ -85,20 +152,25 @@ def memo_Account(driver,account_number,insured_name,memo_subject,memo_body):
             return False
 
 
-
-def memo_Message(msg):
-    if(msg.upper() == "Answering Machine".upper()):
+'''
+Description: Determines the appropriate memo based on the description
+'''
+def memo_Message(description):
+    if(description.upper() == "Answering Machine".upper()):
         return left_message_memo
-    elif(msg.upper() == "Connected".upper()):
+    elif(description.upper() == "Connected".upper()):
         return connected_memo
-    elif(msg.upper() == "No Answer".upper()):
+    elif(description.upper() == "No Answer".upper()):
         return no_answer_memo
-    elif(msg.upper() == "Invalid Phone Number".upper()):
+    elif(description.upper() == "Invalid Phone Number".upper()):
         return bad_number_memo
     else:
-        quit("The call description <",msg,"> does not match. Should be\n1)Answering Machine\n2)Connected\n3)No Answer\n4)Invalid Phone Number")
-        return "Error"
+        print("The call description <",msg,"> does not match. Should be\n1)Answering Machine\n2)Connected\n3)No Answer\n4)Invalid Phone Number")
+        return "Invalid Decsription"
 
+'''
+Description: Concatenates the subject into a single string
+'''
 def format_Subject(contact_name,dial_number,call_start_time,call_end_time,message_id,job_id):
     subject = ("DIAL NUMBER: [" + dial_number + '] ' +
               "CALL START TIME: [" + call_start_time + '] ' +
@@ -131,8 +203,6 @@ try:
 except NoSuchElementException: 
     exit("Unsuccessful log in")
 
-#test for correct file format
-
 #parse file
 with open(inputFile,mode = 'r',encoding = 'utf-8') as csv_file:
     #file operations
@@ -153,17 +223,22 @@ with open(inputFile,mode = 'r',encoding = 'utf-8') as csv_file:
             else:
                 contract_page.click()
             finally: 
-                pass
-            memo_Account(driver,row[0].replace(" ", ""),row[1],memo_Message(row[3]),format_Subject(row[1],row[2],row[11],row[8],row[9],row[13]))
-        
-        line_count += 1
+                contract_num = contract_num.replace(" ","")
+                contract_num = contract_num.split("and")
+            if(
+                not memo_Accounts(driver,
+                                  contract_num, #contract number
+                                  memo_Message(row[3]), #body
+                                  format_Subject(row[1],row[2],row[11],row[8],row[9],row[13]))
+              ):
+              failed_accounts.append(contract_num)
 
         #display progress
         if (line_count > 0):
             print(line_count,":",row[0].replace(" ", ""),"-",row[3])
+        line_count += 1
 
-    print("Processed",(line_count-1),"Contracts")
-
+print("Processed",(line_count-1),"Contracts")
 print("--- %s seconds ---" % (time.time() - start_time))
 
 #display accounts that didn't get memo'd

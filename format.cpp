@@ -11,7 +11,7 @@
  *     -Group is automatically set to the range of dates on the intent report
  *     -All files should be in CSV format
  * 
-*/
+ */
 #include <Spreadsheet_Reader/Row.h>
 
 // column numbers
@@ -165,7 +165,7 @@ string formatDate(const string date) {
     string str, newDate;
 
     getline(ss,str,'/');
-    newDate += Months[stoi(str)];
+    newDate += Months[stoi(str)-1];
 
     getline(ss,str,'/');
     newDate += (" " + str + " ");
